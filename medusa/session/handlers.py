@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import logging
 
-from cloudscraper import CloudScraper
+from lib.cloudscraper.cloudscraper import CloudScraper
 
 from medusa.logger.adapters.style import BraceAdapter
 
@@ -40,7 +40,8 @@ def cloudflare(session, resp, **kwargs):
         original_request = resp.request
 
         # Get the Cloudflare tokens and original user-agent
-        tokens, user_agent = CloudScraper.get_tokens(original_request.url)
+
+        tokens, user_agent = CloudScraper.get_tokens(original_request.url, interpreter='js2py')
 
         # Add Cloudflare tokens to the session cookies
         session.cookies.update(tokens)

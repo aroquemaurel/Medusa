@@ -24,7 +24,6 @@ log.logger.addHandler(logging.NullHandler())
 
 class YggtorrentProvider(TorrentProvider):
     """Yggtorrent Torrent provider."""
-
     torrent_id_pattern = re.compile(r'\/(\d+)-')
 
     def __init__(self):
@@ -36,17 +35,18 @@ class YggtorrentProvider(TorrentProvider):
         self.password = None
 
         # URLs
-        self.url = 'https://www.yggtorrent.to'
+        domain = "yggtorrent.se"
+        self.url = 'https://www2.' + domain
         self.urls = {
-            'auth': urljoin(self.url, 'user/ajax_usermenu'),
-            'login': urljoin(self.url, 'user/login'),
+            'auth': urljoin('https://' + domain, 'user/ajax_usermenu'),
+            'login': urljoin('https://' + domain, 'user/login'),
             'search': urljoin(self.url, 'engine/search'),
             'download': urljoin(self.url, 'engine/download_torrent?id={0}')
         }
 
         # Proper Strings
         self.proper_strings = ['PROPER', 'REPACK', 'REAL', 'RERIP']
-
+        self.session.cloudflare = True
         # Add Saison as a season pack search keyword, as this is a French provider.
         self.season_templates = (
             'S{season:0>2}',  # example: 'Series.Name.S03'
@@ -81,12 +81,11 @@ class YggtorrentProvider(TorrentProvider):
             for search_string in search_strings[mode]:
 
                 if mode != 'RSS':
-                    log.debug('Search string: {search}',
-                              {'search': search_string})
+                    log.debug('Search string: {search}', {'search': search_string})
 
                     search_params['name'] = re.sub(r'[()]', '', search_string)
 
-                response = self.session.get(self.urls['search'], params=search_params)
+                response = self.session.get(self.get_redirect_url(self.urls['search']), params=search_params)
                 if not response or not response.text:
                     log.debug('No data returned from provider')
                     continue
